@@ -1,0 +1,67 @@
+{% extends "billy_the_messenger/base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block body %}
+    {% include 'billy_the_messenger/menu.html' %}
+    <hr> </hr>
+    <form>
+    <div class="container" width = "90"> <h2 container="text-center"> Информация о пользователе</h2>  </div>
+    <hr> </hr>
+    <div class="card card-body">
+        <div class="row">
+            <div class="col">
+                <h4 class = "text-center">   Имя   Фамилия </h4>
+                <h4 container = "text-center">   <img src="..." alt="name" class="img-thumbnail" width = "10%">  </h4>
+                <div class="form-group">
+                     <label for="exampleInputFile" class="bmd-label-floating"> </label>
+                     <input type="file" class="form-control-file" id="exampleInputFile">
+                     <small class="text-muted">Фотография для пользователя</small>
+                </div>
+
+            </div>
+            <div class="col">
+                <div class="card card-body">
+                    <ul class="list-group bmd-list-group-sm">
+                     <a class="list-group-item">
+                        <div class="bmd-list-group-col">
+                            <p class="list-group-item-heading">Место жительства</p>
+                            <p class="list-group-item-text">Москва, улица Льва Толстого</p>
+                        </div>
+                    </a>
+                    <a class="list-group-item">
+                        <div class="bmd-list-group-col">
+                            <p class="list-group-item-heading"> Возраст</p>
+                            <p class="list-group-item-text">30 лет</p>
+                        </div>
+                    </a>
+                        <a class="list-group-item">
+                            <div class=bmd-list-group-col">
+                          <p class="list-group-item-heading">Контактный телефон</p>
+                          <p class="list-group-item-text">7 985 146 46 15</p>
+                        </div>
+                      </a>
+                    </ul>
+                </div>
+            </div>
+
+      </div>
+
+
+    </div>
+
+
+
+    <hr> </hr>
+        <div class = "row">
+           <div class = "col" >
+               <ul class="list-group">
+                   <a class="list-group-item" href="{% url 'user_profile' %}"> Редактировать </a>
+               </ul>
+
+           </div>
+
+        </div>
+
+    <hr> </hr>
+    </form>
+{% endblock %}

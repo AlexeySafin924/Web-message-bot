@@ -1,0 +1,106 @@
+{% extends 'billy_the_messenger/menu.html' %}
+{% load staticfiles %}
+{% block content %}
+    {% include 'billy_the_messenger/message.html' %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-4">Вы всегда онлайн?</h1>
+            <p>Наш продукт для социальных сетей дает вам возможность оставаться активным в разговорах, даже если вы
+                не в сети</p>
+            <div class="row justify-content-start text-center">
+                <div class="col-4 col-lg-1">
+                    <img src="https://image.flaticon.com/icons/svg/145/145813.svg" alt="icon name">
+                    <p>VK</p>
+                </div>
+                <div class="col-4 col-lg-1">
+                    <img src="https://image.flaticon.com/icons/svg/185/185977.svg" alt="icon name">
+                    <p>Telegram</p>
+                </div>
+                <div class="col-4 col-lg-1">
+                    <img src="https://image.flaticon.com/icons/svg/773/773330.svg" alt="icon name">
+                    <p>Бот</p>
+                </div>
+
+            </div>
+            <p><a class="btn btn-primary" href="#myModal" data-toggle="modal">Узнать больше</a></p>
+            <div id="myModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+
+                            <h4 class="modal-title">Более подробное описание нашего продукта</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>■ Присутствует искусственный интеллект, который будет обучаться и отвечать за вас, когда
+                                вы офлайн</p>
+                            <p>■ Поддержка соцсетей VK и Telegram</p>
+                            <p>■ Поддержка диалогов вида “От пользователя к пользователю”</p>
+                            <p>■ Поддержка многопользовательских диалогов (конференции)</p>
+                            <p>■ Возможность переключаться между аккаунтами по ходу общения</p>
+                            <p>■ Поддерживаются статусы пользователя (онлайн/отошёл)</p>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md my-auto">
+                <p class="display-4">
+                    Все что вам нужно сделать - дать время нашему боту научиться отвечать так же как и вы
+                </p>
+                <p>Буквально за пару часов Билли проанализирует ваши переписки,
+                    обучится на их примере, а после начнет отвечать в вашем индивидуальном стиле</p>
+            </div>
+            <div class="col-md">
+                <img src="{% static 'images/laptop.svg' %}">
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md my-auto order-last">
+                <p class="display-4">
+                    Для чего это может понадобиться?
+                </p>
+                <p>■ Искусственный интеллект ответит за вас, когда вы оффлайн</p>
+                <p>■ Выполнение рутинных операций</p>
+                <p>■ Возможность деликатным образом не вступать в даилог с неприятными вам людьми</p>
+            </div>
+            <div class="col-md">
+                <img style="max-width: 100%" src="{% static 'images/cogs.svg' %}">
+            </div>
+        </div>
+        <div class="row mb-5">
+
+            <div class="col-md my-auto">
+                <p class="display-4">
+                    Вам осталось только приступить
+                </p>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'signup' %}"
+                       class="btn btn-raised btn-primary my-2 my-sm-0 mr-3">Зарегистрироваться</a>
+                {% endif %}
+                <a href="{% url 'about' %}" class="btn btn-raised btn-primary my-2 my-sm-0 mr-3">О нас</a>
+            </div>
+            <div class="col-md offset-1">
+                <img style="max-width: 100%" src="{% static 'images/logo.png' %}">
+            </div>
+        </div>
+    </div>
+{% endblock %}

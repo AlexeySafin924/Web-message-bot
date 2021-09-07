@@ -1,0 +1,33 @@
+image: srx64/prom:v1
+
+documentation:
+  before_script:
+  - apk update
+  - apk add doxygen
+  - apk add ttf-freefont graphviz
+  script:
+  - doxygen ci/Doxyfile_CI
+  only:
+  - develop
+
+code_style:
+  before_script:
+  - apk update
+  - apk add py-pip
+  - pip install pycodestyle
+  script:
+  - pycodestyle --ignore=E501,E265 main
+  only:
+  - develop
+
+test:
+  before_script:
+  - apk update
+  - apk add py-pip
+  - pip install -r ci/requirements.txt
+
+  script:
+  - coverage run manage.py test --settings=ci.settings
+  - coverage report main/*.py
+  only:
+  - develop

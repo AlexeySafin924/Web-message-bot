@@ -1,0 +1,59 @@
+{% extends "billy_the_messenger/menu.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block content %}
+    {% include "billy_the_messenger/message.html" %}
+    <div class="container">
+        <div class="card m-3">
+            <div class="card-body">
+                <div class="row justify-content-between">
+                    <div class="col-sm col-md col-lg-4  pt-3">
+                        <img class="img-fluid" src="{{ avatar }}">
+                    </div>
+                    <div class="col pt-3">
+                        <div class="display-4">{{ nickname }}</div>
+
+                        <div class="h5">{{ email }}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col order-lg-last">
+                <div class="card m-3 ">
+                    <div class="card-body ">
+                        <h5 class="card-title">Аккаунты</h5>
+                        <div class="card-block">
+                            <a class="btn btn-secondary" href="{% url 'vk_auth' %}">
+                                VK
+                            </a>
+                            <span class="text-muted">{% if has_vk %}(Вы уже подключили аккаунт){% endif %}</span>
+                        </div>
+                        <div class="card-block">
+                            <a class="btn btn-secondary" href="{% url 'tm_auth' %}">
+                                Telegram
+                            </a>
+                            <span class="text-muted">{% if has_tm %}(Вы уже подключили аккаунт){% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col order-lg-first">
+                <div class="card m-3 ">
+                    <div class="card-body">
+                        <h5 class="card-title">Смена пароля в системе</h5>
+                        <form method="post" action="{% url 'change_password' %}">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                {{ password_form|crispy }}
+
+                            </div>
+                            <button class="btn" type="submit">Изменить пароль</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

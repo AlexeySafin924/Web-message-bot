@@ -1,0 +1,8 @@
+{% for alert in alerts %}
+    <div class="alert alert-{{ alert.tags }} fixed-top w-100" role="alert">
+        {{alert}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endfor %}

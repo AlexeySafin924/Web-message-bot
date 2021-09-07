@@ -1,0 +1,9 @@
+.centered-form {
+    width: 25%;
+}
+
+@media screen and (max-width: 1024px) {
+    .centered-form {
+        width: 100%;
+    }
+}

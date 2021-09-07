@@ -1,0 +1,21 @@
+{% extends "billy_the_messenger/menu.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container pt-3">
+        <div class="row">
+            <div class="col-lg-5 mx-auto">
+                <div class="alert alert-info">
+                    Введите код, отправленный в Telegram для авторизации
+                </div>
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="button" class="btn btn-raised btn-primary" onClick="history.go(-1);">Назад</button>
+                    <button type="submit" class="btn btn-raised btn-primary" onClick="{% url 'tm_reg_code' %}">Отправить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

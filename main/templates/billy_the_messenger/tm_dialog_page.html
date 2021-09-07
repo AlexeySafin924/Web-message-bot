@@ -1,0 +1,342 @@
+{% extends 'billy_the_messenger/menu.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <style>
+        body {
+            overflow-y: hidden;
+        }
+
+        @media (min-width: 992px) {
+            #input-container {
+                right: -253px;
+                width: calc(100% - 253px);
+            }
+        }
+    </style>
+
+    {% include "billy_the_messenger/message.html" %}
+
+    <div id="dialogs" class="bmd-layout-container bmd-drawer-f-l active" style="height: 100vh;">
+        <header class="bmd-layout-header">
+            <div class="navbar navbar-light bg-white">
+
+                <div class="d-flex justify-content-between w-100 mt-1">
+
+                    <button class="btn d-lg-none" type="button" data-toggle="drawer" data-target="#dw-s2">
+                        <span class="sr-only">Toggle drawer</span>
+                        <i class="material-icons">message</i>
+                    </button>
+                    <button id="chat-name" type="button" class="btn btn-dark" data-toggle="tooltip"
+                            data-placement="bottom" title="Был(а) в сети NaN минут назад">
+                        Выберите переписку
+                    </button>
+                    <p><a class="btn btn-primary" href="#myModal2" data-toggle="modal">
+                        <img id="companion_photo" class="" style="height: 3pc; border-radius: 50%" src="{% static 'images/avatars/default.png' %}">
+                    </a></p>
+
+
+                </div>
+            </div>
+
+
+        </header>
+        <div id="dw-s2" class="bmd-layout-drawer" style="overflow-x: hidden">
+            <header>
+                <a class="navbar-brand">Диалоги</a>
+                <button type="button" id="sliderVK" class="btn btn-outline-primary" style="color:#004e92;">VK</button>
+                <button type="button" id="sliderTG" class="btn btn-outline-primary" style="color:#1a8ace;">TG</button>
+            </header>
+            <ul class="list-group">
+                {% for dialog in dialogs %}
+                    <a id="{{ dialog.id }}"  data-is-chat="{{ dialog.is_chat}}" class="card btn btn-secondary p-0 dialog" style="text-decoration: none " href="#">
+                        <div class="card-body p-0">
+                            <div class="card-text pt-2">
+                                <div class="row  justify-content-start p-1 pl-3 pr-3">
+                                    <div class="col-3">
+                                        <img class="" style="height: 3pc; border-radius: 50%" src="{{ dialog.photo }}">
+                                    </div>
+                                    <div class="col-8 text-capitalize">
+                                        <p>{{ dialog.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-text">
+                                <div class="row  justify-content-between pr-1 pl-3 pb-2 pt-2">
+                                    <div class="col-8">
+                                        <div class="" style="white-space: nowrap; text-overflow: ellipsis; text-transform: none; overflow: hidden; ">{{ dialog.last_message }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted text-right">{{ dialog.date }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+
+            </ul>
+        </div>
+        <main class="bmd-layout-content">
+
+            <div style="height: calc(100vh - 235px); overflow-y: scroll;" id="messages-container" class="btn btn-secondary w-100" onclick="get_new_messages(chat_id)">Загрузить ещё</button>
+                <div class="container">
+                    <div id="message-area">
+                    </div>
+                </div>
+            </div>
+
+            <div class="container bg-white fixed-bottom p-3" id="input-container" style=" ">
+                <div class="input-group mb-3">
+                    <input type="text" id="message-input" class="form-control" placeholder="Введите сообщение"
+                           aria-label="Сообщение" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button id="send" class="btn btn-outline-secondary" type="button">Отправить</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
+        <div id="myModal2" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">User</h4>
+                    </div>
+                    <div class="modal-body">
+                        Информация о пользователе
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // TODO Perphaps this should be moved to main.js or something like that (too lazy to do that)
+        function toggleMessages() {
+            if (window.matchMedia("(min-width: 992px)").matches) { // If media query matches
+                document.getElementById("dialogs").classList.add("bmd-drawer-in");
+                document.getElementById("dialogs").classList.remove("bmd-drawer-overlay");
+            }
+            else {
+                document.getElementById("dialogs").classList.add("bmd-drawer-overlay");
+                document.getElementById("dialogs").classList.remove("bmd-drawer-in");
+            }
+        }
+        toggleMessages();
+         window.matchMedia("(min-width: 992px)").addListener(toggleMessages);
+
+        people_status = {};
+
+        url = "/dialogs/get_new/";
+        var current_id = 0;
+
+        var csrftoken = Cookies.get('csrftoken');
+        var new_messages_url = "/dialogs/get_messages/";
+        var send_message_url = "/dialogs/send/";
+        var get_dialogs_url = "/dialogs/get_dialogs";
+        // TODO: chat_id determining
+        var messages_limit = 100;
+        var current_offset = 0;
+        var chat_id = '';
+        var mode = 'vk';
+
+        // Ajax
+        $.ajaxSetup({
+            headers:
+                {'X-CSRF-TOKEN': csrftoken}
+        });
+
+        $('.dialog').click(function () {
+            current_offset = 0;
+            chat_id = $(this).attr('id');
+            var is_chat = $(this).attr('data-is-chat');
+            $('#chat-name').text($(this).find('p').text());
+            get_new_messages(chat_id, is_chat);
+        });
+
+        $('#send').click(function() {
+            var text = $('#message-input').val();
+            $('#message-input').val('');
+            $.ajax({
+                url: send_message_url,
+                data: {
+                    'text': text,
+                    'target': chat_id,
+                    'mode': mode,
+                },
+                success: function() {}
+            })
+        });
+
+        function get_new_messages(id, is_chat, limit=messages_limit) {
+            $.ajax({
+                url: new_messages_url,
+                data: {
+                    'id': chat_id,
+                    'limit': limit,
+                    'offset': current_offset,
+                    'mode': mode,
+                    'is_chat': is_chat,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    $('#companion_photo').attr('src', data.chat_photo);
+                    if (current_offset == 0) {
+                        var messages = '';
+                        // data.reverse();
+                        for (var i = 0; i < data.messages.length; ++i) {
+
+                            var offset = "";
+
+                            if (data.messages[i].side == 'right')
+                                offset += "offset-4 offset-lg-7";
+
+
+                            messages += `<div class="row message" id="${data.messages[i].message_id}">\n` +
+                `                            <div class="col-8 col-lg-5 ${offset}">\n` +
+                '                                <div class="card m-3">\n' +
+                '                                    <div class="card-body">\n' +
+                `                                        <h5 class="card-title" style="font-size: .97em; color: #008e76;">${data.messages[i].name}</h5>\n` +
+                `                                        <h6 class="card-subtitle text-muted" style="font-size: .82em;">${new Date(data.messages[i].date)}</h6>\n` +
+                `                                        <p class="card-text" style="font-size: 1.19em;">${data.messages[i].text}</p>\n` +
+                '                                    </div>\n' +
+                '                                </div>\n' +
+                '                             </div>\n' +
+                '                        </div>';
+                        }
+                        $('#message-area').html(messages);
+                    }
+                    else {
+                        for (var i = 0; i < data.messages.length; ++i) {
+
+                            var offset = "";
+
+                            if (data.messages[i].side == 'right')
+                                offset += "offset-4 offset-lg-7";
+
+                            $(`<div. class="row message" id="${data.messages[i].message_id}">\n` +
+                                `                              <div class="col-8 col-lg-5 ${offset}">\n` +
+                                '                                  <div class="card m-3">\n' +
+                                '                                      <div class="card-body">\n' +
+                                `                                          <h5 class="card-title" style="font-size: .97em; color: #008e76;">${data.messages[i].user}</h5>\n` +
+                                `                                          <h6 class="card-subtitle text-muted" style="font-size: .82em;">${new Date(data.messages[i].date)}</h6>\n` +
+                                `                                          <p class="card-text" style="font-size: 1.19em;">${data.messages[i].text}</p>\n` +
+                                '                                      </div>\n' +
+                                '                                  </div>\n' +
+                                '                              </div>\n' +
+                                '                          </div.>').hide().prependTo('#message-area').show('slow');
+                        }
+
+                    }
+                    current_offset += messages_limit;
+                }
+            });
+        }
+
+        function get_new_dialogs() {
+            $.ajax({
+                url: get_dialogs_url,
+                data: {
+                    'mode': mode
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data['error']) {
+                        console.log(data['error'])
+                    }
+                    else {
+                        var dialogs = data['dialogs'];
+                        var html_res = '';
+                        for (i = 0; i < dialogs.length; i++) {
+                            html_res += '<a id="' + dialogs[i]['id'] + '" data-is-chat="' + dialogs[i]['is_chat'] + '" class="card dialog" href="#">\n' +
+                    '                        <div class="card-body">\n' +
+                    '                            <p class="card-text">' + dialogs[i]['first_name'] + '</p>\n' +
+                    '                        </div>\n' +
+                    '                    </a>'
+                        }
+                        $(' #dw-s2 ul').html(html_res);
+                    }
+                }
+            });
+        }
+        function getStatus(id) {
+            if (statusWS.readyState === statusWS.OPEN) {
+                statusWS.send(JSON.stringify({
+                    id: id
+                }))
+            }
+            console.log("Couldnt update status: no opened connections")
+        }
+
+        function updateCurrentStatus() {
+            if (current_id in people_status) {
+                time = people_status[current_id] * 1000;
+                if (Date.now() - time > 1000*15*60)
+                    status = `Был(а) в сети ${new Date(time).toLocaleString('ru')}`;
+                else
+                    status = 'Онлайн'
+            }
+            else {
+                status = 'Подождите...';
+                setTimeout(function () {
+                    getStatus(current_id)
+                }, 2000)
+            }
+            $('#status-tooltip').attr('data-original-title', status)
+        }
+
+        // Reverse scroll
+        window.onload = function () {
+            objDiv = document.getElementById("messages-container");
+            objDiv.scrollTop = objDiv.scrollHeight;
+            objDiv.onscroll = function () {
+                if (objDiv.scrollTop === 0) {
+                    get_new_messages();
+                    objDiv.scrollTop = 5
+                }
+            };
+        };
+
+        // WebSockets
+        let websocket_protocol = (window.location.protocol === 'https' ? 'wss' : 'ws');
+
+        statusWS = new ReconnectingWebSocket(`${websocket_protocol}://{{ host }}ws/chat/${mode}/`);
+
+        statusWS.onmessage = function (e) {
+            data = JSON.parse(e.data);
+            id = data['id'];
+            people_status[id] = data['lastActivity'];
+            updateCurrentStatus()
+
+        };
+
+        statusWS.onopen = function () {
+            statusWS.send(JSON.stringify({
+                id: current_id,
+            }))
+        }
+
+        $('#sliderTG').hide(500);
+
+
+        $('#sliderVK').click(
+            function() {
+                $('#sliderVK').hide(500);
+                $('#sliderTG').show(500);
+                mode='tm'
+            }
+        );
+        $('#sliderTG').click(
+            function() {
+                $('#sliderTG').hide(500);
+                $('#sliderVK').show(500);
+                mode='vk'
+            }
+        );
+
+    </script>
+{% endblock %}

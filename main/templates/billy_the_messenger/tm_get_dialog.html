@@ -1,0 +1,12 @@
+{% extends "billy_the_messenger/base.html" %}
+
+{% block body %}
+    <form method="post" class="form-control bmd-form-group form-group">
+        {% csrf_token %}
+        <div class="form-group bmd-form-group">
+            {{ form }}
+        </div>
+        <button type="button" class="btn btn-raised btn-primary" onClick="history.go(-1);">Go back</button>
+        <button type="submit" class="btn btn-raised btn-primary">submit</button>
+    </form>
+{% endblock %}

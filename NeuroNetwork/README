@@ -1,0 +1,5 @@
+1. Run in terminal setup.sh
+2. New directory chatBot will be created.
+3. Training will be started
+   You can stop it with Ctrl+C.
+   If you wwant to run it again run `python execute.py` (in chatBot folder with activated aivenv)
